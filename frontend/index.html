@@ -1,12 +1,282 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gradio4 React Compose Lab</title>
-  </head>
-  <body class="bg-gray-50">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>gradio4-react-compose-lab — Service Hub</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg: #0b0c10;
+      --bg-soft: #11131a;
+      --card: #141824;
+      --text: #e9edf1;
+      --muted: #a9b1bd;
+      --brand: #7aa2ff;
+      --ok: #37d399;
+      --warn: #ffd166;
+      --bad: #ff6b6b;
+      --stroke: #2a2f3a;
+      --shadow: 0 10px 25px rgba(0,0,0,.25);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg: #f6f7fb;
+        --bg-soft: #ffffff;
+        --card: #ffffff;
+        --text: #0f1222;
+        --muted: #5a6270;
+        --brand: #3451ff;
+        --stroke: #e9ebf3;
+        --shadow: 0 8px 18px rgba(20,32,80,.12);
+      }
+    }
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0; background: radial-gradient(1200px 600px at 80% -10%, rgba(52,81,255,.18), transparent 60%) , var(--bg);
+      color: var(--text); font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", "Hiragino Sans", "Noto Sans JP", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    a{ color: var(--brand); text-decoration: none; }
+    header{
+      position: sticky; top: 0; z-index: 5; backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(17,19,26,.75), rgba(17,19,26,.35), transparent);
+      border-bottom: 1px solid var(--stroke);
+    }
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .hero{
+      display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
+    }
+    .brand{
+      display: flex; align-items: center; gap: 14px;
+    }
+    .brand-badge{
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), #9ec2ff 80%); box-shadow: var(--shadow);
+      display: grid; place-items: center; color: white; font-weight: 800; letter-spacing: .5px;
+    }
+    .brand h1{ margin: 0; font-size: 20px; }
+    .brand small{ display:block; color: var(--muted); margin-top: 2px; }
+    .theme{
+      display:flex; gap:10px; align-items:center;
+    }
+    .btn{
+      appearance: none; border: 1px solid var(--stroke); background: var(--bg-soft);
+      color: var(--text); padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      box-shadow: var(--shadow); transition: transform .06s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+    .grid{
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 22px;
+    }
+    @media (max-width: 1080px){ .grid{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 640px){ .grid{ grid-template-columns: 1fr; } }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.0)), var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 16px; box-shadow: var(--shadow); position: relative; overflow: clip;
+    }
+    .card h3{ margin: 0 0 6px; font-size: 18px; }
+    .desc{ color: var(--muted); font-size: 14px; min-height: 42px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size: 12px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--stroke);
+      background: var(--bg-soft); color: var(--muted);
+    }
+    .status-dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+    .status-ok{ background: var(--ok); }
+    .status-bad{ background: var(--bad); }
+    .actions{ display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn.primary{ background: linear-gradient(135deg, var(--brand), #7aa2ff); border-color: transparent; color: #fff; }
+    .btn.ghost{ background: transparent; }
+    .meta{
+      display:flex; justify-content: space-between; align-items:center; margin-top: 10px;
+    }
+    .tag{ font-size: 11px; color: var(--muted); border: 1px dashed var(--stroke); padding: 2px 8px; border-radius: 999px; }
+    .footer{
+      margin-top: 30px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--stroke); padding-top: 16px;
+    }
+    /* small inline diagram */
+    .diagram{
+      margin-top: 18px; border: 1px solid var(--stroke); border-radius: 14px; padding: 10px 12px; background: var(--bg-soft);
+      display:flex; align-items:center; gap: 8px; overflow:auto; white-space:nowrap; font-size: 13px;
+    }
+    .chip{
+      padding: 6px 10px; border-radius: 999px; border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent); display:inline-flex; align-items:center; gap:6px;
+    }
+    .arrow{ opacity: .6; }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap hero" role="banner">
+    <div class="brand" aria-label="brand">
+      <div class="brand-badge" aria-hidden="true">G4</div>
+      <div>
+        <h1>gradio4-react-compose-lab</h1>
+        <small>React フロント × 4つの Gradio アプリをまとめた統合デモ</small>
+      </div>
+    </div>
+    <div class="theme">
+      <button class="btn" id="themeToggle" title="テーマ切替">🌓 テーマ</button>
+      <a class="btn ghost" href="https://github.com/your-org/gradio4-react-compose-lab" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" role="main" aria-live="polite">
+  <section class="diagram" aria-label="flow diagram">
+    <span class="chip">React Frontend</span>
+    <span class="arrow">→</span>
+    <span class="chip">/apps/* (reverse-proxy)</span>
+    <span class="arrow">→</span>
+    <span class="chip">Gradio App #1</span>
+    <span class="arrow">→</span>
+    <span class="chip">Gradio App #2</span>
+    <span class="arrow">→</span>
+    <span class="chip">Gradio App #3</span>
+    <span class="arrow">→</span>
+    <span class="chip">Gradio App #4</span>
+  </section>
+
+  <section style="margin-top: 18px">
+    <div class="grid" id="cards" aria-label="services grid">
+      <!-- JS will render cards here -->
+    </div>
+  </section>
+
+  <section class="footer">
+    <div>ヒント：各 Gradio アプリでは <span class="kbd">api_name</span> を付与すると
+      <span class="kbd">/apps/&lt;name&gt;/api/predict/&lt;api_name&gt;</span> でJSON APIが出ます。
+      React 側は <span class="kbd">@gradio/client</span> での呼び出しがハマりにくいです。
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { Client } from "@gradio/client";
+  // ======= 設定（Composeのリバプロ配下のパスに合わせて書き換え） =======
+  // 例: Nginxで /apps/text を text コンテナにプロキシ
+  const services = [
+    {
+      id: "text",
+      name: "Text Lab",
+      desc: "テキスト生成／要約などのLLM実験UI",
+      ui: "/apps/text",
+      api: "/apps/text/api/predict/generate",
+      tags: ["Gradio 4.x", "Queue", "LLM"]
+    },
+    {
+      id: "vision",
+      name: "Vision Lab",
+      desc: "画像→テキスト、分類・タグ付けなど",
+      ui: "/apps/vision",
+      api: "/apps/vision/api/predict/analyze",
+      tags: ["Gradio 4.x", "Computer Vision"]
+    },
+    {
+      id: "audio",
+      name: "Audio Lab",
+      desc: "TTS/STTや音声エフェクトの検証",
+      ui: "/apps/audio",
+      api: "/apps/audio/api/predict/transcribe",
+      tags: ["Gradio 4.x", "Audio"]
+    },
+    {
+      id: "tools",
+      name: "Tools Lab",
+      desc: "ユーティリティ（埋め込み生成、ファイル変換など）",
+      ui: "/apps/tools",
+      api: "/apps/tools/api/predict/embed",
+      tags: ["Gradio 4.x", "Utils"]
+    }
+  ];
+  // ======= ここまで設定 =======
+
+  const cardsEl = document.getElementById("cards");
+
+  function cardTemplate(svc){
+    const tagHtml = svc.tags?.map(t => `<span class="tag">${t}</span>`).join(" ") || "";
+    return `
+      <article class="card" id="card-${svc.id}" aria-labelledby="title-${svc.id}">
+        <div class="meta">
+          <span class="badge" id="status-${svc.id}">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>Checking...</span>
+          </span>
+          <div>${tagHtml}</div>
+        </div>
+        <h3 id="title-${svc.id}">${svc.name}</h3>
+        <p class="desc">${svc.desc}</p>
+        <div class="actions">
+          <a class="btn primary" href="${svc.ui}" target="_blank" rel="noopener">Open UI</a>
+          ${svc.api ? `<a class="btn" href="${svc.api}" target="_blank" rel="noopener">Open API</a>` : ""}
+          <button class="btn ghost" data-id="${svc.id}" data-ui="${svc.ui}">Recheck</button>
+        </div>
+      </article>
+    `;
+  }
+
+  function render(){
+    cardsEl.innerHTML = services.map(cardTemplate).join("");
+    document.querySelectorAll('button[data-id]').forEach(btn=>{
+      btn.addEventListener('click', ()=> ping(btn.dataset.id, btn.dataset.ui));
+    });
+  }
+
+  async function ping(id, url){
+    const el = document.getElementById(`status-${id}`);
+    const dot = el.querySelector('.status-dot');
+    const txt = el.querySelector('span:last-child');
+    txt.textContent = "Checking...";
+    dot.classList.remove('status-ok','status-bad');
+
+    const controller = new AbortController();
+    const t = setTimeout(()=> controller.abort(), 4500);
+    try{
+      const res = await fetch(url, { method: 'GET', signal: controller.signal, credentials: 'same-origin' });
+      clearTimeout(t);
+      if(res.ok){
+        dot.classList.add('status-ok');
+        txt.textContent = "Healthy";
+      }else{
+        dot.classList.add('status-bad');
+        txt.textContent = `Unhealthy (${res.status})`;
+      }
+    }catch(e){
+      clearTimeout(t);
+      dot.classList.add('status-bad');
+      txt.textContent = "Unreachable";
+    }
+  }
+
+  function pingAll(){ services.forEach(s=> ping(s.id, s.ui)); }
+
+  // Theme toggle
+  const themeBtn = document.getElementById('themeToggle');
+  themeBtn.addEventListener('click', ()=>{
+    const isDark = document.documentElement.classList.toggle('force-light');
+    if(isDark){
+      document.documentElement.style.colorScheme = 'light';
+    }else{
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  });
+
+  render();
+  pingAll();
+
+  async function demoClient(){
+    const client = await Client.connect("http://localhost:7861/");
+    const result = await client.predict("/predict", { text: "Hello!!" });
+    console.log(result.data);
+  }
+  demoClient();
+</script>
+</body>
 </html>
