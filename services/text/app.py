@@ -4,7 +4,7 @@ from datetime import datetime
 import gradio as gr
 
 
-def flip_text(text: str):
+def flip_text(text):  # 型ヒントを削除
     """Return reversed text and a downloadable .txt file path."""
     out = text[::-1]
     fd, path = tempfile.mkstemp(suffix=".txt", prefix="text_out_")

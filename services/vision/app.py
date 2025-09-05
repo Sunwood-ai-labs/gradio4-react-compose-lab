@@ -1,19 +1,18 @@
 import os
 import tempfile
-from typing import Tuple
 import gradio as gr
 import numpy as np
 from PIL import Image
 
 
-def mirror_image(img: np.ndarray) -> Tuple[str]:
+def mirror_image(img):  # 型ヒントを削除
     """Mirror the image horizontally and return a file path."""
     mirrored = img[:, ::-1]
     # Save to a temp file and return path
     fd, path = tempfile.mkstemp(suffix=".png", prefix="vision_out_")
     os.close(fd)
     Image.fromarray(mirrored).save(path)
-    return (path,)
+    return path  # タプルではなく直接パスを返す
 
 
 demo = gr.Interface(
