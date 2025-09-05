@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  text:
+    build: ./services/text
+    ports:
+      - "7861:7860"
+  vision:
+    build: ./services/vision
+    ports:
+      - "7862:7860"
+  audio:
+    build: ./services/audio
+    ports:
+      - "7863:7860"
+  tools:
+    build: ./services/tools
+    ports:
+      - "7864:7860"
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - text
+      - vision
+      - audio
+      - tools
