@@ -12,13 +12,15 @@ def mirror_image(img):  # 型ヒントを削除
     fd, path = tempfile.mkstemp(suffix=".png", prefix="vision_out_")
     os.close(fd)
     Image.fromarray(mirrored).save(path)
-    return path  # タプルではなく直接パスを返す
+    # プレビューとダウンロード用に同じパスを2つ返す
+    return path, path
 
 
 demo = gr.Interface(
     fn=mirror_image,
     inputs=gr.Image(label="img"),
-    outputs=gr.Image(type="filepath", label="output"),
+    # outputsをリストにし、gr.Imageとgr.Fileの両方を出力する
+    outputs=[gr.Image(type="filepath", label="output"), gr.File(label="download")],
     title="Vision Demo",
 )
 
