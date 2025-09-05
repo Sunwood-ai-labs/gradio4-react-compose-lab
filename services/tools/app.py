@@ -1,17 +1,17 @@
 import os
 import json
 import tempfile
-from typing import Optional, Tuple
 import gradio as gr
 
 
-def tools(action: Optional[str], text: Optional[str], file: Optional[str]) -> Tuple[str]:
+def tools(action, text, file):  # 型ヒントを削除
     """Simple utility endpoint:
     - If file provided, just return it (acts like passthrough convert)
     - Else, write a small JSON report to a temp file and return its path
     """
     if file:
-        return (file,)
+        return file  # タプルではなく直接返す
+    
     payload = {
         "action": action or "none",
         "text": text or "",
@@ -19,7 +19,7 @@ def tools(action: Optional[str], text: Optional[str], file: Optional[str]) -> Tu
     fd, path = tempfile.mkstemp(suffix=".json", prefix="tools_out_")
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-    return (path,)
+    return path  # タプルではなく直接パスを返す
 
 
 demo = gr.Interface(
